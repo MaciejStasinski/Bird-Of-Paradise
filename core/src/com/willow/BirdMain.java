@@ -15,13 +15,12 @@ import java.util.Random;
 
 public class BirdMain extends ApplicationAdapter {
 	SpriteBatch batch;
-	Texture img,bird;
+	Texture img,bird,lost,start;
 	float bw,bh,sw,sh, bx, by;
 	float velocity = 0.0f;
 	float gravity = 0.6f;
 	int state =0;
 	Texture bee1,bee2,bee3;
-	float beex,bee1y,bee2y,bee3y;
 	int nbees =3;
 	float beesx[]= new float[nbees];
 	float beesy[][]= new float[3][nbees];
@@ -43,6 +42,8 @@ public class BirdMain extends ApplicationAdapter {
 		bee1 = new Texture("1.png");
 		bee2 = new Texture("2.png");
 		bee3 = new Texture("1.png");
+		start = new Texture("start.png");
+		lost = new Texture("lost.png");
 		bw=Gdx.graphics.getWidth()/13;
 		bh=Gdx.graphics.getHeight()/11;
 		sw=Gdx.graphics.getWidth();
@@ -91,13 +92,13 @@ public class BirdMain extends ApplicationAdapter {
 		batch.begin();
 		batch.draw(img, 0, 0, sw, sh);
 		batch.draw(bird, bx, by, bw, bh);
-
+/**
+* State 1
+* */
 		if (state == 1) {
 			sound1Flag=true;
-			if (sound2Flag) {
-				sound2.play();
-				sound2Flag=false;
-			}
+			sound2Flag=false;
+
 			if (Gdx.input.justTouched()) {
 				velocity = -20;
 				sound3Flag=true;
@@ -123,14 +124,13 @@ public class BirdMain extends ApplicationAdapter {
 					score++;
 					flag=false;
 				}
+
 				beesx[i] -= 15;
 				batch.draw(bee1,beesx[i],beesy[0][i],bw,bh);
 				batch.draw(bee2,beesx[i],beesy[1][i],bw,bh);
 				batch.draw(bee3,beesx[i],beesy[2][i],bw,bh);
 			}
 			if (by < 0-(2*bh) || by>sh) {
-				by = sw / 3;
-				velocity = 0;
 				state=2;
 			}
 			else {
@@ -138,14 +138,18 @@ public class BirdMain extends ApplicationAdapter {
 				by = by - velocity;
 			}
 		}
+/**
+ * STATE 2
+ * */
 		else if (state==2) {
-			sound2Flag=true;
+			by = sw / 3;
+			velocity = 0;
+			font1.draw(batch,"SCORE: "+String.valueOf(score),bh,bh);
+			batch.draw(lost, 0, 0, sw, sh);
 			if (sound1Flag) {
 				sound1.play();
 				sound1Flag=false;
 			}
-			font2.draw(batch,"You lost! Tap the screen to try again!",sw/9,sh/2);
-			font2.draw(batch,"Your score: "+String.valueOf(score),sw/3,sh/2-bh);
 			if (Gdx.input.justTouched()) {
 				bx = Gdx.graphics.getWidth() / 4;
 				by = Gdx.graphics.getHeight();
@@ -168,14 +172,21 @@ public class BirdMain extends ApplicationAdapter {
 				state = 1;
 			}
 		}
+/**
+ * STATE 0
+ * */
 		else if (state==0) {
-			font2.draw(batch,"TAP THE SCREEN TO START!",bw*2,sh/2);
+			batch.draw(start, 0, 0, sw, sh);
 			if (Gdx.input.justTouched()) {
+				if (sound2Flag) {
+					sound2.play();
+				}
 			state=1;
 			}
 		}
+
+		//		sr.begin(ShapeRenderer.ShapeType.Filled);
 		c_bird.set(bx+bw/2,by+bh/2,bw/4);
-//		sr.begin(ShapeRenderer.ShapeType.Filled);
 		for(int i=0;i<nbees;i++){
 			c_bee1[i].set(beesx[i]+bw/2,beesy[0][i]+bh/2,bw/4);
 			c_bee2[i].set(beesx[i]+bw/2,beesy[1][i]+bh/2,bw/4);
